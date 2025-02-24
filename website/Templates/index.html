@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INVENTORY MANAGEMENT SYSTEM</title>
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #909ede; /* Light gray background color */
+        }
+        .container {
+            margin: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+        }
+        #queryResult {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>INVENTORY MANAGEMENT SYSTEM</h1>
+        <form id="queryForm">
+            <textarea id="queryInput" name="query" placeholder="Enter SQL query" rows="5"></textarea><br>
+            <button type="submit">Run Query</button>
+        </form>
+        <div id="queryResult"></div>
+    </div>
+
+    <script>
+        document.getElementById('queryForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var query = document.getElementById('queryInput').value;
+
+            fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayQueryResult(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        function displayQueryResult(data) {
+            var queryResultDiv = document.getElementById('queryResult');
+            queryResultDiv.innerHTML = '';
+
+            if (data.error) {
+                queryResultDiv.innerText = 'Error: ' + data.error;
+            } else {
+                var table = document.createElement('table');
+                var headerRow = table.insertRow();
+                data.columns.forEach(function(column) {
+                    var headerCell = headerRow.insertCell();
+                    headerCell.textContent = column;
+                });
+                data.rows.forEach(function(row) {
+                    var newRow = table.insertRow();
+                    row.forEach(function(value) {
+                        var cell = newRow.insertCell();
+                        cell.textContent = value;
+                    });
+                });
+                queryResultDiv.appendChild(table);
+            }
+        }
+    </script>
+</body>
+</html>
